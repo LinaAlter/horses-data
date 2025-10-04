@@ -121,14 +121,26 @@ horses_filled_df.corr(method='spearman')
 #по полученным данным видно, что корреляция по всем столбцам не превышает 0,4. 'outcome' показывает сильную связь со столбцами с пропусками, сам пропусков больше не имеет.
 #Заполняем пропуски по среднему, через группировку по 'outcome'
 
-temp_of_ex_by_outcome_df = horses_filled_df.groupby('outcome')['temperature of extremities'].mean().round(0)
-#print(temp_of_ex_by_outcome_df)
-
-#horses_filled_df.loc[horses_filled_df['outcome'], horses_filled_df['temperature of extremities'].isna()]
 
 
+def fill_mean_by_outcome(col):
+    means_by_outcome = horses_filled_df.groupby('outcome')[col].mean().round(0)
+    
+    
+    horses_filled_df[col] = horses_filled_df.apply(
+            lambda row: means_by_outcome[row['outcome']] if pd.isna(row[col]) else row[col],
+            axis=1
+        )
 
+fill_mean_by_outcome('rectal temperature')
+fill_mean_by_outcome('pulse')
+fill_mean_by_outcome('pain')
+fill_mean_by_outcome('temperature of extremities')
 
+missing_values = horses_filled_df.isnull().sum()
+print(missing_values)
+print(horses_filled_df.head(15))
+print(horses_filled_df.describe())
 
 
 
